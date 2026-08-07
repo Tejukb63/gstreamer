@@ -41,6 +41,7 @@ public:
 
         // Ensure HLS output directory exists
         std::filesystem::create_directories("hls");
+        std::filesystem::create_directories("recordings");
 
         pipeline     = gst_pipeline_new("vms-pipeline");
 
@@ -63,6 +64,21 @@ public:
         mux          = gst_element_factory_make("mpegtsmux",     "mux");
         que          = gst_element_factory_make("queue",         "hls_queue");
         hls          = gst_element_factory_make("hlssink",       "hls_sink");
+
+
+        //this is fot the continous video recording
+
+        tee = gst_element_factory_make("tee" , "tee_splitter");
+        file_que = gst_element_factory_make("queue" , "file_queue");
+        file_sink = gst_element_factory_make("filesink" , "file_sink");
+
+        if(!tee || !file_que || !file_sink){
+            std::cerr<<"[[gst]] failed to create tee/filesink/filequ\n";
+            return -1;
+        }
+
+
+
 
         // Validate element creation
         if (!pipeline || !src || !dep || !par || 
@@ -97,11 +113,14 @@ public:
             "max-files",         20,
             nullptr);
 
+
+        g_object_set(file_sink, "location", "recordings/complete_record.ts", nullptr); // this is where i am saving the long recording in the nvr
+
         /* 6. Add all elements to the Bin */
         gst_bin_add_many(GST_BIN(pipeline),
             src, dep, par,
             audio_depay, audio_dec, audio_conv, audio_resamp, audio_enc,
-            klv_src, mux, que, hls, nullptr);
+            klv_src, mux, tee, que, hls, file_que, file_sink, nullptr);
 
         /* 7. Link Static Video Branch */
         if (!gst_element_link(dep, par)) {
@@ -153,11 +172,28 @@ public:
         gst_object_unref(klv_pad);
         gst_object_unref(mux_kpad);
 
-        /* 10. Link Muxer to HLS Output */
-        if (!gst_element_link_many(mux, que, hls, nullptr)) {
-            std::cerr << "[GST] Failed to link mux -> queue -> hlssink.\n";
+        //10. Link Muxer to HLS Output 
+        //if (!gst_element_link_many(mux, que, hls, nullptr)) {
+           // std::cerr << "[GST] Failed to link mux -> queue -> hlssink.\n";
+            //return -1;
+        //} 
+
+        if(!gst_element_link(mux , tee)){
+            std::cerr<< "[gst] failed to link the mux with tee.\n";
             return -1;
         }
+
+        if(!gst_element_link_many(tee, que, hls, nullptr)){  //branch 1 link the tee with hls
+            std::cerr<<"[gst] failed to link the tee with que->hls\n";
+            return -1;
+        }
+
+        // baranching for the actual nvr  for the long recordings
+        if(!gst_element_link_many(tee , file_que, file_sink , nullptr)){
+            std::cerr<<"[gst] failed to cretae tee with tee->file_que->file->sink.\n";
+            return -1;
+        }
+
 
         /* 11. Connect RTSP Signals */
         g_signal_connect(src, "select-stream", G_CALLBACK(selectStreamCb), this);
@@ -201,6 +237,9 @@ private:
     GstElement        *audio_depay, *audio_dec, *audio_conv, *audio_resamp, *audio_enc;
     GstElement        *klv_src;
     GstElement        *mux, *que, *hls;
+
+    GstElement        *tee, *file_que, *file_sink;  // this is for the contioosu video recording 
+
     GstBus            *bus;
 
     // Threads and synchronization
@@ -364,3 +403,9 @@ private:
         gst_caps_unref(caps);
     }
 };
+
+
+//g++ main.cpp -o vms_server -std=c++17 $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -loatpp -pthread
+
+//socat -d -d pty,raw,echo=0 pty,raw,echo=0
+// ./vms_server
