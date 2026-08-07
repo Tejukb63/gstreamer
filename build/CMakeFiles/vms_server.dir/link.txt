@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/vms_server.dir/link.d CMakeFiles/vms_server.dir/src/main.cpp.o -o vms_server  /usr/local/lib/oatpp-1.4.0/liboatpp.a -lgstapp-1.0 -lgstbase-1.0 -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -latomic

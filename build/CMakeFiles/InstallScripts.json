@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/vboxuser/vms_workspace/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

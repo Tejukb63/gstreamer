@@ -1,0 +1,3 @@
+/home/vboxuser/vms_workspace/build/CMakeFiles/vms_server.dir
+/home/vboxuser/vms_workspace/build/CMakeFiles/edit_cache.dir
+/home/vboxuser/vms_workspace/build/CMakeFiles/rebuild_cache.dir
