@@ -245,7 +245,7 @@ private:
     // Background thread: reads NMEA lines and injects them as KLV buffers.
     // -----------------------------------------------------------------------
     void gpsThreadFunction() {
-        const std::string gps_port_path = "/dev/pts/5";
+        const std::string gps_port_path = "/dev/pts/4";
         std::ifstream gps_port(gps_port_path);
 
         if (!gps_port.is_open()) {
