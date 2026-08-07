@@ -347,3 +347,5 @@ int main(int argc, char *argv[]) {
     KlvPipeline pipeline;
     return pipeline.run(argc, argv);
 }
+
+//g++ -o testing1 testing1.cpp $(pkg-config --cflags --libs gstreamer-1.0 gstreamer-app-1.0) -pthread
