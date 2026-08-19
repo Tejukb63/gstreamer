@@ -275,7 +275,7 @@ private:
 
     /* Background thread reading GPS port and injecting into appsrc */
     void gpsThreadFunction() {
-        const std::string gps_port_path = "/dev/pts/4"; // Adjust port as needed
+        const std::string gps_port_path = "/dev/pts/2"; // Adjust port as needed
         std::ifstream gps_port(gps_port_path);
 
         if (!gps_port.is_open()) {

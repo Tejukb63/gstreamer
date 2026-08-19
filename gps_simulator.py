@@ -2,7 +2,7 @@ import time
 import serial
 
 # CHANGE THIS to the first port socat gave you
-SERIAL_PORT = "/dev/pts/5" 
+SERIAL_PORT = "/dev/pts/1" 
 
 print(f"Starting simulated GNSS on {SERIAL_PORT}...")
 ser = serial.Serial(SERIAL_PORT, 9600)
